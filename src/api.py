@@ -21,4 +21,11 @@ def create_app(service):
     async def add_api_key():
         return {"message": "Add API Key"}
 
+    """
+        获取配置
+    """
+    @app.get("/settings")
+    async def settings():
+        return {"settings": settings.model_config}
+
     return app

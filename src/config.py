@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     DB_PORT: int
     # 模型
     MODEL_NAME: str
+    COMPRESS_MODEL_NAME: str
     BASE_URL: str
 
     model_config = SettingsConfigDict(
