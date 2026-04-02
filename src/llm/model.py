@@ -6,7 +6,12 @@ class ModelDepository:
 
     def __init__(self):
         self.models = []
-
+        self.compress_model = ChatOpenAI(
+            model=settings.COMPRESS_MODEL_NAME,
+            api_key=settings.DASHSCOPE_API_KEY,
+            base_url=settings.BASE_URL,
+            temperature=0.7
+        )
         self.models.append(
             ChatOpenAI(
                 model=settings.MODEL_NAME,
