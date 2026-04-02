@@ -5,6 +5,10 @@ def create_app(service):
 
     app = FastAPI(title="YachiyoAI", version="2.0")
 
+    """
+        普通用户接口
+    """
+
     @app.get("/")
     async def root():
         return {"message": "Hello World"}
