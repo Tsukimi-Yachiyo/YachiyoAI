@@ -4,4 +4,7 @@
 
 """
 
+from .db_history import init as db_history_init
 
+def init():
+    db_history_init()

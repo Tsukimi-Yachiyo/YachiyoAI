@@ -1,7 +1,7 @@
 from openai import  RateLimitError, BadRequestError
 from ..state import State
-from persistent.yml import all_yaml
-from llm.model import model
+from persistent import yml
+from llm import model
 from tool import logging
 
 logger = logging.getLogger(__name__)
@@ -10,19 +10,20 @@ def summary_out(state: State):
     """
         完善角色描述
     """
-    prompt = all_yaml.get("complete_personal_prompt")
+    prompt = yml.all_yaml.get("complete_personal_prompt")
     try:
-        answer = model.get_llm().invoke(prompt)
+        answer = model.model_service.get_llm().invoke(prompt)
         if answer:
             state.answer = answer
-            return {"return":False}
+            return {"repeat":False}
         else:
-            return {"return":True}
+            return {"repeat":True}
     except RateLimitError:
-        model.delete_model()
+        model.model_service.delete_model()
+        return {"repeat":True}
     except BadRequestError as e:
         logger.error(e)
         if "context_length_exceeded" in str(e).lower():
-            return {"return":False,"summary": True }
+            return {"repeat":False,"summary": True }
         else:
-            return {"return":True}
+            return {"repeat":True}
