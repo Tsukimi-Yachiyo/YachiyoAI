@@ -1,14 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    # 阿里云百炼
-    DASHSCOPE_API_KEY: str
-    # PostgresSQL
-    DB_NAME: str
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_HOST: str
-    DB_PORT: int
+
     # 模型
     MODEL_NAME: str
     COMPRESS_MODEL_NAME: str
