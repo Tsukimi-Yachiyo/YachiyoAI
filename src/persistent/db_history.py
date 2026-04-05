@@ -37,7 +37,7 @@ class ChatHistory(BaseModel):
     information = TextField(null=False)
 
     class Meta:
-        table_name = "chat_history"
+        table_name = yml.all_yaml.get('database.table.long_term')
         indexes = (
             (('user_id', 'tag'), True),
         )
