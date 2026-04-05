@@ -2,6 +2,9 @@ from peewee import *
 from src.config import settings
 from langchain_core.messages import HumanMessage, AIMessage
 from datetime import datetime
+from psycopg_pool import ConnectionPool
+from langgraph.checkpoint.postgres import PostgresSaver
+from psycopg.rows import dict_row
 
 db = PostgresqlDatabase(
     settings.DB_NAME,
@@ -15,6 +18,13 @@ db = PostgresqlDatabase(
     对话历史记录模型
 """
 
+pool = ConnectionPool(
+    # 关键修复：用真实配置拼接连接字符串
+    conninfo=f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}",
+    configure=db,
+    max_size=60,
+    kwargs={"autocommit": True, "row_factory": dict_row}
+)
 
 class BaseModel(Model):
     class Meta:
@@ -40,11 +50,11 @@ class HistoryService:
         保存对话历史
     """
     @staticmethod
-    def save_msg(session_id: str, message: HumanMessage | AIMessage):
+    def save_msg(session_id: str, ai_message: AIMessage, human_message: HumanMessage):
         ChatHistory.create(
             message_id=session_id,
-            user=message.content,
-            ai=message.content
+            user=human_message.user,
+            ai=human_message.ai,
         )
 
     """
@@ -68,7 +78,6 @@ class HistoryService:
     @staticmethod
     def clear_history(session_id: str):
         ChatHistory.delete().where(ChatHistory.message_id == session_id).execute()
-
 
     @staticmethod
     def get_history_count(session_id: str):
