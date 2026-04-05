@@ -10,7 +10,7 @@ from llm import model
 
 # 导入数据库服务
 from persistent.db_history import history_service
-from persistent import init as db_init
+from persistent import init_db as db_init
 
 from agents import start
 from persistent.json import json_init

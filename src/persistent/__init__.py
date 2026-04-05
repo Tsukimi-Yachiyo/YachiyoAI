@@ -5,6 +5,8 @@
 """
 
 from .db_history import init as db_history_init
+from .db_api_depository import init as api_depository_init
 
-def init():
+def init_db():
     db_history_init()
+    api_depository_init()

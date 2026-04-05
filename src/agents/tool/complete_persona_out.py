@@ -2,11 +2,11 @@ from openai import  RateLimitError, BadRequestError
 from ..state import State
 from persistent import yml
 from llm import model
-from tool import logging
+import logging
 
 logger = logging.getLogger(__name__)
 
-def summary_out(state: State):
+def complete_persona_out(state: State):
     """
         完善角色描述
     """
