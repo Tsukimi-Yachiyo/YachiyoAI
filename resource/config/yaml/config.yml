@@ -9,7 +9,7 @@ database:
   host: "localhost"
   port: 5432
 
-  db_name:
+  table:
     api_depository: "api_depository"
     conversation: "conversation"
     long_term: "long_term"
