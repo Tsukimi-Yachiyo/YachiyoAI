@@ -15,7 +15,8 @@ def create_app(service):
 
     @app.get("/chat")
     async def chat():
-        return {"message": "Chat"}
+        result = await service.chat()
+        return result
 
     @app.post("/add_api_key")
     async def add_api_key():
