@@ -2,13 +2,16 @@ from peewee import *
 from langchain_core.messages import HumanMessage, AIMessage
 from datetime import datetime
 from langgraph.checkpoint.postgres import PostgresSaver
-import logging, db_history
+import logging, persistent.db_history as db_history
 from persistent import yml
 
 db = db_history.db
 history_service = None
 
 logger = logging.getLogger(__name__)
+
+def init():
+    ApiDepository._meta.table_name = yml.all_yaml.get('database.table.api_depository')
 
 class ApiDepository(db_history.BaseModel):
     id = AutoField(primary_key=True)
@@ -20,7 +23,7 @@ class ApiDepository(db_history.BaseModel):
     remain_tokens = IntegerField(null=False, default=100000)
 
     class Meta:
-        table_name = yml.all_yaml.get('database.table.api_depository')
+        table_name = None
         indexes = (
             (('user_id', 'tag'), True),
         )

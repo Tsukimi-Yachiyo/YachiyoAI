@@ -19,7 +19,7 @@ def init():
         host=yml.all_yaml.get('database.host'),
         port=yml.all_yaml.get('database.port')
     )
-
+    ChatHistory._meta.table_name = yml.all_yaml.get('database.table.long_term')
     history_service = HistoryService()
     logger.info("数据库连接初始化")
 
@@ -37,7 +37,7 @@ class ChatHistory(BaseModel):
     information = TextField(null=False)
 
     class Meta:
-        table_name = yml.all_yaml.get('database.table.long_term')
+        table_name = None
         indexes = (
             (('user_id', 'tag'), True),
         )
