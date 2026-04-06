@@ -13,7 +13,7 @@ collection_name = settings.KNOWLEDGE_BASE_DB_TABLE_NAME
 CONNECTION_STRING = f"postgresql+asyncpg://{username}:{password}@{host}:{port}"
 embeddings = model.model_service.embeddings_model
 
-vector_store = PGVector(embeddings=embeddings, collection_name=collection_name, connection=CONNECTION_STRING, async_mode=True)
+vector_store = PGVector(embeddings=embeddings, collection_name=collection_name, connection=CONNECTION_STRING, async_mode=True, create_extension=False)
 max_retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 min_retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
