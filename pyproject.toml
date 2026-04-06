@@ -27,6 +27,7 @@ notebook = "^7.5.5"
 graphviz = "^0.21"
 pygraphviz = "^1.14"
 langchain-postgres = "^0.0.17"
+ipynbname = "^2025.8.0.0"
 
 
 [build-system]
