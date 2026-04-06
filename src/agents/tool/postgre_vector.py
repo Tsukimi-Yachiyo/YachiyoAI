@@ -10,25 +10,23 @@ host = settings.DB_HOST
 port = settings.DB_PORT
 collection_name = settings.KNOWLEDGE_BASE_DB_TABLE_NAME
 
-CONNECTION_STRING = f"postgresql://{username}:{password}@{host}:{port}"
+CONNECTION_STRING = f"postgresql+asyncpg://{username}:{password}@{host}:{port}"
 embeddings = model.model_service.embeddings_model
 
-vector_store = PGVector(embeddings=embeddings, collection_name=collection_name, connection=CONNECTION_STRING)
+vector_store = PGVector(embeddings=embeddings, collection_name=collection_name, connection=CONNECTION_STRING, async_mode=True)
 max_retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 min_retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
-@tool(response_format="content_and_artifact")
-def max_retrieve_documents(query: str):
+async def max_retrieve_documents(query: str):
     """从 PostgreSQL 向量库检索相关内容，用于回答用户问题。
         从数据库中检索最多5个文档
     """
-    retrieved_docs = max_retriever.invoke(query)
-    return retrieved_docs, retrieved_docs
+    retrieved_docs = await max_retriever.ainvoke(query)
+    return retrieved_docs
 
-@tool(response_format="content_and_artifact")
-def min_retrieve_documents(query: str):
+async def min_retrieve_documents(query: str):
     """从 PostgreSQL 向量库检索相关内容，用于回答用户问题。
         从数据库中检索最多3个文档
     """
-    retrieved_docs = min_retriever.invoke(query)
-    return retrieved_docs, retrieved_docs
+    retrieved_docs = await min_retriever.ainvoke(query)
+    return retrieved_docs
