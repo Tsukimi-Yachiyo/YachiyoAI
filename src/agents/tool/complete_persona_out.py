@@ -1,18 +1,18 @@
 from openai import  RateLimitError, BadRequestError
-from ..state import State
 from persistent import yml
 from llm import model
-import logging
+from .postgre_vector import max_retrieve_documents
 
 logger = logging.getLogger(__name__)
+llm = model.model_service.get_llm().bind_tools([max_retrieve_documents])
 
-def complete_persona_out(state: State):
+async def complete_persona_out(state: State):
     """
         完善角色描述
     """
     prompt = yml.all_yaml.get("complete_personal_prompt")
     try:
-        answer = model.model_service.get_llm().invoke(prompt)
+        answer = await llm.ainvoke(prompt)
         if answer:
             state.answer = answer
             return {"repeat":False}

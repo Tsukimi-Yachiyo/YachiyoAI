@@ -2,18 +2,30 @@ from peewee import *
 from langchain_core.messages import HumanMessage, AIMessage
 from datetime import datetime
 from langgraph.checkpoint.postgres import PostgresSaver
-import logging, persistent.db_history as db_history
 from persistent import yml
+from config import settings
 
-db = db_history.db
-history_service = None
+api_depository_service = None
 
 logger = logging.getLogger(__name__)
 
-def init():
-    ApiDepository._meta.table_name = yml.all_yaml.get('database.table.api_depository')
+db = PostgresqlDatabase(
+    settings.DB_NAME,
+    user=settings.DB_USER,
+    password=settings.DB_PASSWORD,
+    host=settings.DB_HOST,
+    port=settings.DB_PORT
+)
 
-class ApiDepository(db_history.BaseModel):
+class BaseModel(Model):
+    class Meta:
+        database = db
+
+def init():
+    global api_depository_service
+    api_depository_service = ApiDepositoryService()
+
+class ApiDepository(BaseModel):
     id = AutoField(primary_key=True)
     user_id = IntegerField(index=True,null=False)
     api_key = CharField(null=False)
@@ -23,9 +35,9 @@ class ApiDepository(db_history.BaseModel):
     remain_tokens = IntegerField(null=False, default=100000)
 
     class Meta:
-        table_name = None
+        table_name = settings.API_DEPOSITORY_DB_TABLE_NAME
         indexes = (
-            (('user_id', 'tag'), True),
+            (('user_id', 'api_key'), True),
         )
 
 class ApiDepositoryService:
@@ -34,7 +46,7 @@ class ApiDepositoryService:
         try:
             with db:
                 db.create_tables([ApiDepository], safe=True)  # safe=True = 不存在才创建
-            logger.info("✅ API仓库数据库表初始化完成")
+            logger.info(f" API仓库数据库表初始化完成")
         except Exception as e:
             logger.error(f"初始化API仓库数据库表失败: {e}")
 
@@ -42,10 +54,11 @@ class ApiDepositoryService:
         保存或更新API仓库信息
     """
     @staticmethod
-    async def save_or_update_msg(user_id: int, tag: str, information: str):
+    async def save_or_update_msg(user_id: int, api_key: str, information: ApiDepository):
         try:
             record, created = await ApiDepository.get_or_create(
-                api_key=information.api_key,
+                user_id=user_id,
+                api_key=api_key,
                 base_url=information.base_url,
                 model=information.model,
                 remain_tokens=information.remain_tokens,

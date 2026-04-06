@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from src.config import settings
 from persistent import yml
 import logging
@@ -16,6 +16,11 @@ class ModelDepository:
             api_key=yml.all_yaml.get("llm.api_key"),
             base_url=settings.BASE_URL,
             temperature=0.7
+        )
+        self.embeddings_model = OpenAIEmbeddings(
+            model=settings.EMBEDDINGS_MODEL_NAME,
+            api_key=yml.all_yaml.get("llm.api_key"),
+            base_url=settings.BASE_URL
         )
         self.models.append(
             ChatOpenAI(

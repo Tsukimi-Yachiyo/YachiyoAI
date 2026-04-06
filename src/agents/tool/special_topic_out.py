@@ -1,6 +1,3 @@
-from ..state import State
-
-
 def special_topic_out(state: State):
 
     """

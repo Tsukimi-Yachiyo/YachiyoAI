@@ -4,6 +4,12 @@
 
 """
 
+
+import builtins
+import logging
+
+builtins.__dict__["logging"] = logging
+
 from .db_history import init as db_history_init
 from .db_api_depository import init as api_depository_init
 

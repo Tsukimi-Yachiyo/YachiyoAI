@@ -1,5 +1,3 @@
-from ..state import State
-
 
 def is_major_topic(state:State):
     """

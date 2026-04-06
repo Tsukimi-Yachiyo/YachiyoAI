@@ -13,6 +13,7 @@ database:
     api_depository: "api_depository"
     conversation: "conversation"
     long_term: "long_term"
+    knowledge_base: "vector_store"
 
 llm:
   api_key: ${API_KEY}
