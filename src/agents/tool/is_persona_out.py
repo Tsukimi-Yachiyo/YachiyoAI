@@ -23,5 +23,5 @@ def is_persona_out(state:State):
 
     logger.info(f"has_characters: {has_characters}, has_self_keywords: {has_self_keywords}, has_regex_patterns: {has_regex_patterns}, has_blacklist_keywords: {has_blacklist_keywords}")
 
-    return {"has_persona_out": has_characters or ((has_self_keywords or has_regex_patterns) and not has_blacklist_keywords)}
+    return {"judgment": has_characters or ((has_self_keywords or has_regex_patterns) and not has_blacklist_keywords)}
 

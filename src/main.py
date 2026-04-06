@@ -71,8 +71,9 @@ class Service:
 def main():
 
     app = Service()
-
-    # app.get_graph()
+    import asyncio
+    result = asyncio.run(app.chat("彩叶是谁", 1))
+    print(result)
     """
         启动API服务
     """
