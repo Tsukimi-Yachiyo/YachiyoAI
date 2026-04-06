@@ -16,3 +16,5 @@ from .db_api_depository import init as api_depository_init
 def init_db():
     db_history_init()
     api_depository_init()
+
+init_db()

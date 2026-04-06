@@ -65,3 +65,5 @@ def model_init():
     global model_service
     model_service = ModelDepository()
     logger.info("模型服务初始化")
+
+model_init()
