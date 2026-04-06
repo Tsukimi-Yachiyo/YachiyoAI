@@ -2,7 +2,7 @@ from langchain_core.messages import trim_messages
 from langchain_core.messages.utils import count_tokens_approximately
 
 
-def pre_model_hook(state):
+def pre_model_hook(state: State):
     trimmed_message = trim_messages(
         state.message,
         strategy = "last",

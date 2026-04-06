@@ -1,4 +1,3 @@
-from ..state import State
 from persistent import yml
 from llm import model
 

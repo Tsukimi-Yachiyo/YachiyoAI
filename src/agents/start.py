@@ -60,28 +60,28 @@ class StartAgent:
         )
         workflow.add_conditional_edges(
             "is_persona_out",
-            self.which_node,
+            self.is_output,
             {
-                "long_term_history": "long_term_history",
-                "complete_persona_out": "complete_persona_out"
+                True: "complete_persona_out",
+                False: "long_term_history"
             }
         )
         workflow.add_edge("long_term_history","is_special_day")
         workflow.add_edge("is_special_day","is_special_topic")
         workflow.add_conditional_edges(
             "is_special_topic",
-            self.which_node,
+            self.is_output,
             {
-                "is_major_topic": "is_major_topic",
-                "special_topic": "special_topic_out"
+                True: "special_topic_out",
+                False: "is_major_topic"
             }
         )
         workflow.add_conditional_edges(
             "is_major_topic",
-            self.which_node,
+            self.is_output,
             {
-                "major_out": "major_out",
-                "tool_judgment": "tool_judgment"
+                True: "major_out",
+                False: "common_topic_out"
             }
         )
         workflow.add_edge("tool_judgment","common_topic_out")
@@ -122,4 +122,8 @@ class StartAgent:
 
     @staticmethod
     def which_node(state):
-        return state["node"]
+        return state["judgment_node"]
+
+    @staticmethod
+    def is_output(state):
+        return state["judgment"]

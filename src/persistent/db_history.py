@@ -2,26 +2,24 @@ from peewee import *
 from langchain_core.messages import HumanMessage, AIMessage
 from datetime import datetime
 from langgraph.checkpoint.postgres import PostgresSaver
-import logging
 from persistent import yml
+from config import settings
 
-db = None
 history_service = None
 
 logger = logging.getLogger(__name__)
 
+db = PostgresqlDatabase(
+    settings.DB_NAME,
+    user=settings.DB_USER,
+    password=settings.DB_PASSWORD,
+    host=settings.DB_HOST,
+    port=settings.DB_PORT
+)
+
 def init():
-    global db, history_service
-    db = PostgresqlDatabase(
-        yml.all_yaml.get('database.db_name.long_term'),
-        user=yml.all_yaml.get('database.user'),
-        password=yml.all_yaml.get('database.password'),
-        host=yml.all_yaml.get('database.host'),
-        port=yml.all_yaml.get('database.port')
-    )
-    ChatHistory._meta.table_name = yml.all_yaml.get('database.table.long_term')
+    global history_service
     history_service = HistoryService()
-    logger.info("数据库连接初始化")
 
 """
     长期对话历史记录模型
@@ -37,8 +35,9 @@ class ChatHistory(BaseModel):
     information = TextField(null=False)
 
     class Meta:
-        table_name = None
+        table_name = settings.LONG_TERM_DB_TABLE_NAME
         indexes = (
+
             (('user_id', 'tag'), True),
         )
 
@@ -48,8 +47,10 @@ class HistoryService:
         try:
             with db:
                 db.create_tables([ChatHistory], safe=True)  # safe=True = 不存在才创建
-            logger.info("✅ 长期对话历史记录数据库表初始化完成")
+            logger.info(f" 长期对话历史记录数据库表初始化完成")
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             logger.error(f"初始化长期对话历史记录数据库表失败: {e}")
 
     """

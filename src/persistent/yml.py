@@ -2,6 +2,7 @@ import yaml, os, re
 import logging
 
 all_yaml = None
+
 logger = logging.getLogger(__name__)
 
 class PersistentYaml:
@@ -53,7 +54,7 @@ def yaml_init():
     global all_yaml
     try:
         all_yaml = PersistentYaml()
-        logger.info("YAML files loaded successfully")
+        logger.info(f"YAML文件加载成功，共加载{len(all_yaml.data)}个键")
     except Exception as e:
-        logger.error(f"Error loading YAML files: {e}")
+        logger.error(f"YAML文件加载失败: {e}")
 

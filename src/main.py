@@ -12,7 +12,6 @@ from llm import model
 from persistent.db_history import history_service
 from persistent import init_db as db_init
 
-from agents import start
 from persistent.json import json_init
 from persistent.yml import yaml_init
 from persistent import yml
@@ -34,6 +33,8 @@ class Service:
         model_init()
         db_init()
 
+        from agents import start
+
         # 初始化服务
         self.model_service = model.model_service
         self.history_service = history_service
@@ -49,8 +50,9 @@ class Service:
     async def chat(self, prompt: str, conversationId: int):
         config = {"configurable": {"thread_id": conversationId}}
         result = await self.state.ainvoke(
-            {"messages": [("user",prompt)]},
-                config)
+            {"messages": [("user",prompt)],
+            "query": prompt,},
+            config = config)
         return result["messages"][-1].content
 
     async def stream(self,prompt):
