@@ -75,7 +75,7 @@ BASE_URL=your_base_url
 ### 开发模式
 
 ```bash
-poetry run python src/main.py
+poetry run python main.py
 ```
 
 服务将在 `http://0.0.0.0:5200` 上运行。

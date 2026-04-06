@@ -58,3 +58,4 @@ def yaml_init():
     except Exception as e:
         logger.error(f"YAML文件加载失败: {e}")
 
+yaml_init()

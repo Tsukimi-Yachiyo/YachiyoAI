@@ -22,3 +22,5 @@ def json_init():
         logger.info(f"JSON文件加载成功，共加载{len(all_json.data)}个键")
     except Exception as e:
         logger.error(f"JSON文件加载失败: {e}")
+
+json_init()

@@ -16,3 +16,4 @@ def logging_init():
     logging.getLogger().setLevel(logging.INFO)
     logging.getLogger("src").setLevel(logging.INFO)
 
+logging_init()
