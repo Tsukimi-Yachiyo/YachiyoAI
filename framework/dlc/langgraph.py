@@ -3,6 +3,9 @@
     基于 langgraph 实现的 langchain 应用
 """
 
+import functools
+
+from public_modules import get_param_types
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, Annotated, Sequence
 from langchain_core.messages import BaseMessage
@@ -72,7 +75,25 @@ def langgraph_node(name: str = None, first_last: bool = None):
                 library.resource["first_node"].append(name)
             else:
                 library.resource["last_node"].append(name)
-        return func
+        param_types = get_param_types(func).keys()
+        @functools.wraps(func)
+        def wrapper(state, config, writer, store, stream):
+            kwargs = {}
+            for param_item_ in param_types:
+                if param_item_ in ["state", "config", "writer", "store", "stream"]:
+                    kwargs[param_item_] = locals()[param_item_]
+                else:
+                    try:
+                        kwargs[param_item_] = library.resource["langgraph_map"][param_item_]
+                    except:
+                        kwargs[param_item_] = None
+            return_information = func(**kwargs)
+            if return_information is not None:
+                if type(return_information) is dict:
+                    library.resource["langgraph_map"].update(return_information)
+                else:
+                    library.resource["langgraph_map"][name] = return_information
+        return wrapper
     return decorator
 
 def langgraph_edge(from_node: str = None, map: dict = None ,name: str = None):
@@ -82,5 +103,18 @@ def langgraph_edge(from_node: str = None, map: dict = None ,name: str = None):
             name = func.__name__
         library.dependencies["langgraph_edge"][name] = func
         library.resource["langgraph_edge"][name] = [from_node, map]
-        return func
+        param_types = get_param_types(func).keys()
+        @functools.wraps(func)
+        def wrapper(state):
+            kwargs = {}
+            for param_item_ in param_types:
+                if param_item_ is "state":
+                    kwargs[param_item_] = state
+                else:
+                    try:
+                        kwargs[param_item_] = library.resource["langgraph_map"][param_item_]
+                    except:
+                        kwargs[param_item_] = None
+            return func(**kwargs)
+        return wrapper
     return decorator
