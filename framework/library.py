@@ -1,7 +1,5 @@
 import os,default
 
-from tensorflow.python.keras.utils.generic_utils import default
-
 # 依赖库(类)
 dependencies = default.dependencies
 

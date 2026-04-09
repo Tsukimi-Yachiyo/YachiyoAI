@@ -10,6 +10,7 @@ class Main(BaseMain):
 
     def __init__(self):
         self.build()
+        __builtins__["logging"] = logging
 
     def build(self):
         __builtins__["library"] = library
