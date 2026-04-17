@@ -1,7 +1,7 @@
 import ast
 import os
 import sys
-import library
+import framework.library as library
 
 
 def scan_py_files(folder="."):
@@ -62,6 +62,7 @@ def safe_register(filepath, obj_name):
     # 收集所有顶级函数和类定义（不收集嵌套内部定义，因为会随外部定义一起执行）
     definitions = []
     for node in tree.body:
+        print(node)
         if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.Import, ast.ImportFrom)):
             definitions.append(node)
 
@@ -73,16 +74,22 @@ def safe_register(filepath, obj_name):
     ast.fix_missing_locations(new_tree)
 
     # 准备安全的执行环境
-    namespace = {}
-    safe_globals = {
+    namespace = {
         "__builtins__": __builtins__,
         "__name__": "__not_main__",  # 阻止模块内的 if __name__ == "__main__" 块
+        "library": library,  # 注入 library 以便访问 resource_dependencies
     }
+    
+    # 注入所有已注册的 Struct 类（请求模型、响应模型等）
+    # 这样 Controller 文件在执行时就能访问到类型注解中的类名
+    for struct_name, struct_cls in library.resource_dependencies.items():
+        if isinstance(struct_cls, type):  # 只注入类
+            namespace[struct_name] = struct_cls
 
     try:
         code = compile(new_tree, filepath, 'exec')
         # 打印编译后的代码
-        exec(code, safe_globals, namespace)
+        exec(code, namespace)
     except Exception:
         import traceback
         traceback.print_exc()
@@ -97,8 +104,29 @@ def safe_register(filepath, obj_name):
 def run():
 
     files = scan_py_files()
-
+    
+    # 收集所有带装饰器的对象
+    all_items = []
     for f in files:
         items = parse_file(f)
-        for _, _, obj_name, path in items:
-            safe_register(path, obj_name)
+        all_items.extend(items)
+    
+    # 分类：先加载 Struct，再加载其他
+    struct_items = []
+    other_items = []
+    
+    for dec_name, obj_type, obj_name, path in all_items:
+        if dec_name == "Struct":
+            struct_items.append((dec_name, obj_type, obj_name, path))
+        else:
+            other_items.append((dec_name, obj_type, obj_name, path))
+    
+    # 第一阶段：加载所有 Struct（请求模型、响应模型等）
+    print("=== 第一阶段：加载 Struct（数据结构类） ===")
+    for dec_name, obj_type, obj_name, path in struct_items:
+        safe_register(path, obj_name)
+    
+    # 第二阶段：加载其他装饰器（Service、Controller、Method 等）
+    print("\n=== 第二阶段：加载其他组件 ===")
+    for dec_name, obj_type, obj_name, path in other_items:
+        safe_register(path, obj_name)

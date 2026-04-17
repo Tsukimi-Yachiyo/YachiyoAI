@@ -1,5 +1,8 @@
-import library
-import public_modules
+import sys
+
+import framework.library as library
+from framework import public_modules
+from framework import check
 
 def run():
     import importlib
@@ -12,6 +15,8 @@ def run():
     main_classes = {}
 
     for plugin_name in plugin_files:
+        if plugin_name in library.resource_yaml["framework.disable_dlc"]:
+            continue
         plugin = importlib.import_module(f"dlc.{plugin_name}")
         all_items = {}
         for name, member in inspect.getmembers(plugin):
@@ -39,16 +44,24 @@ def run():
     library.init_order.sort(key=lambda x: x[1], reverse=True)
 
     for plugin_name in library.init_order:
+        try:
+            check.dependency_check(main_classes[plugin_name[0]].check)
+        except AttributeError:
+            pass
+        except Exception as e:
+            import sys
+            sys.exit(1)
+
         new_main = main_classes[plugin_name[0]]()
 
         library.builder[plugin_name[0]] = new_main.build
 
-        # 尝试获取 loop_method，check_method
+        # 尝试获取 loop_method，verify_method
         try:
             library.loop_method = new_main.loop_method
         except:
             pass
         try:
-            library.dependencies["Check"][plugin_name[0]] = new_main.check
+            library.dependencies["Verify"][plugin_name[0]] = new_main.verify
         except:
             pass

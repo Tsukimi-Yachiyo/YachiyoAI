@@ -1,4 +1,4 @@
-import library
+import framework.library as library
 import public_modules
 import builtins
 import logging

@@ -29,9 +29,6 @@ resource_yaml = default.resource_yaml | yml.yaml_init()
 from resource import json
 resource_json = json.json_init()
 
-# 资源库(系统) - env
-from resource import config
-
 # 资源库(实例) - 依赖
 resource_dependencies = {}
 
