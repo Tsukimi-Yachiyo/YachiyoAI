@@ -1,0 +1,4 @@
+framework:
+  database:
+    type: sqlite
+    path: apikey.db

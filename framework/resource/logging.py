@@ -1,5 +1,6 @@
 import logging
 import logging.config
+import os
 
 
 def logging_init():
@@ -9,7 +10,7 @@ def logging_init():
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[
             logging.StreamHandler(),
-            logging.FileHandler("chat.log", encoding="utf-8")
+            logging.FileHandler(os.getenv("LOG_FILE", "framework.log"), encoding="utf-8")
         ]
     )
     # 减少不必要的日志输出

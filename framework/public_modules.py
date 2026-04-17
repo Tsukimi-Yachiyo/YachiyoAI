@@ -1,5 +1,5 @@
 import functools
-import library
+import framework.library as library
 
 import logging
 import inspect
@@ -12,20 +12,66 @@ logger = logging.getLogger(__name__)
 """
 class Service:
     def __init__(self, cls):
+
+        cls.__init__ = auto_inject()(cls.__init__)
+
+        def build(cls_, *args, **kwargs):
+            return cls_(*args, **kwargs)
+
+        build = functools.wraps(cls)(build)
+
+        setattr(cls, 'build', classmethod(build))
+
         self.cls = cls
 
-        library.dependencies["Service"][self.cls.__name__] = self
+        library.dependencies["Service"][self.cls.__name__] = cls
         logger.info(f"Service {self.cls.__name__} 已加入库")
 
     def __call__(self, *args, **kwargs):
-        logger.info(f"Service {self.cls.__name__} 已调用, 这是不推荐的用法, 请使用 auto_inject")
+        stack = inspect.stack()
+        caller_method = stack[1].function if len(stack) > 1 else ""
+
+        if caller_method not in ["build", "create"]:
+            logger.info(f"Service {self.cls.__name__} 已调用, 这是不推荐的用法, 请使用 auto_inject")
+
         return self.cls(*args, **kwargs)
 
     def __str__(self):
         return self.cls.__name__
 
-    def build(self):
-        return self.cls
+    @staticmethod
+    def create(cls: str, name: str = None):
+        service = library.dependencies["Service"][cls]()
+        if name is not None:
+            library.resource_dependencies[name] = service
+        return service
+
+    @staticmethod
+    def get(cls: str):
+        return library.resource_dependencies[cls]
+
+"""
+    数据结构装饰器
+    用于注册数据结构类（如请求模型、响应模型、DTO 等）到全局命名空间
+    解决跨模块访问问题
+"""
+class Struct:
+    def __init__(self, cls):
+        self.cls = cls
+        
+        # 注册到 library.dependencies["Struct"]
+        library.dependencies["Struct"][self.cls.__name__] = cls
+        
+        # 同时注册到 resource_dependencies 以便全局访问
+        library.resource_dependencies[self.cls.__name__] = cls
+        
+        logger.info(f"Struct {self.cls.__name__} 已加入库")
+
+    def __call__(self, *args, **kwargs):
+        return self.cls(*args, **kwargs)
+
+    def __str__(self):
+        return self.cls.__name__
 
 """
     方法修饰器
@@ -84,7 +130,11 @@ def auto_inject(*same_name_args, **customize_args):
             # 检查参数类型是否正确
             for param_item_ in kwargs.keys():
                 try :
-                    if type(kwargs[param_item_]) != param_types[param_item_] and type(kwargs[param_item_]) is not None:
+                    param_type = param_types[param_item_]
+                    # 跳过字符串类型的注解（前向引用）
+                    if isinstance(param_type, str):
+                        continue
+                    if type(kwargs[param_item_]) != param_type and type(kwargs[param_item_]) is not None:
                         logger.error(f"调用函数 {func.__name__}, 参数 {param_item_} 类型错误, 应该是 {param_types[param_item_]}")
                         raise TypeError(f"参数 {param_item_} 类型错误, 应该是 {param_types[param_item_]}")
                 except KeyError:
@@ -92,6 +142,12 @@ def auto_inject(*same_name_args, **customize_args):
                     raise ValueError(f"参数 {param_item_} 不存在")
             for index, arg in enumerate(args):
                 param_type = list(param_types.values())[index]
+                if param_type == inspect.Parameter.empty:
+                    continue
+                # 跳过字符串类型的注解（前向引用）
+                if isinstance(param_type, str):
+                    continue
+
                 if type(arg) != param_type and type(arg) is not None:
                     logger.error(f"调用函数 {func.__name__}, 第 {index} 个参数 类型错误, 应该是 {param_type}")
 
@@ -132,4 +188,5 @@ def get_param_types(func):
 library.decorator["Service"] = Service
 library.decorator["auto_inject"] = auto_inject
 library.decorator["Method"] = Method
+library.decorator["Struct"] = Struct
 

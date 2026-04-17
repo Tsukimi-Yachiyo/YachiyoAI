@@ -1,4 +1,5 @@
 import os
+import logging
 
 def check():
     if not os.path.exists("src"):
@@ -17,8 +18,10 @@ def check():
         os.mkdir("src\\resource\\yaml")
         print("src\\resource\\yaml 目录已创建")
 
-def dependency_check():
-    import library
-
-    for check_method in library.dependencies["Check"]:
+def dependency_check(check_method):
+    logger = logging.getLogger("check")
+    try:
         check_method()
+    except ValueError as e:
+        logger.error(e)
+        raise e

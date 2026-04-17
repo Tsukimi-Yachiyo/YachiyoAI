@@ -1,10 +1,11 @@
-import build
-import load_dlc
-import load_src
-import library
+from framework import build
+from framework import load_dlc
+from framework import load_src
+import framework.library as library
 import signal
 import sys
 import threading
+from framework import check
 
 
 
@@ -13,6 +14,7 @@ def run():
     # 加载 扩展插件 并 执行服务发现
     load_dlc.run()
     load_src.run()
+
 
     # 构建 服务
     build.build()
